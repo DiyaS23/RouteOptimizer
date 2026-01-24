@@ -18,7 +18,7 @@ public class RouteController {
 
     private final RouteService routeService;
 
-    @PostMapping("/calculate")
+    @GetMapping("/calculate")
     public RouteResponse calculateRoute(
             @RequestParam String source,
             @RequestParam String target) {

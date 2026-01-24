@@ -1,40 +1,37 @@
 package com.delivery.route_optimizer.exception;
 
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
-import java.time.Instant;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
 import java.util.Map;
 
-@RestControllerAdvice
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<?> handleNotFound(NotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                Map.of(
-                        "error", ex.getMessage(),
-                        "timestamp", Instant.now()
-                )
-        );
+        ex.printStackTrace();
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(NoRouteFoundException.class)
     public ResponseEntity<?> handleNoRoute(NoRouteFoundException ex) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(
-                Map.of(
-                        "error", ex.getMessage(),
-                        "timestamp", Instant.now()
-                )
-        );
+        ex.printStackTrace();
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", ex.getMessage()));
     }
 
+    // ✅ ONE generic fallback handler
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneric(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                Map.of(
-                        "error", "Internal server error",
-                        "timestamp", Instant.now()
-                )
-        );
+        ex.printStackTrace(); // 🔥 critical for debugging
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", ex.getMessage()));
     }
 }

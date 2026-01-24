@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -20,10 +21,14 @@ public class RiderController {
 
         RouteResult result = riderRouteService.getCurrentRoute(id);
 
+        List<String> nodes = result.getNodes();
+
         return RouteResponse.builder()
                 .routeId(UUID.randomUUID().toString())
                 .riderId(id)
                 .nodes(result.getNodes())
+                .source(nodes.get(0))
+                .target(nodes.get(nodes.size() - 1))
                 .totalDistance(result.getTotalDistance())
                 .cacheHit(result.isCacheHit())
                 .computedAt(Instant.now())

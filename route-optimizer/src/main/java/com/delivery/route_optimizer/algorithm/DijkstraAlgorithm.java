@@ -1,7 +1,10 @@
 package com.delivery.route_optimizer.algorithm;
 
+import org.springframework.stereotype.Component;
+
 import java.util.*;
 
+@Component
 public class DijkstraAlgorithm {
 
     public List<GraphNode> shortestPath(Graph graph, GraphNode source, GraphNode target) {
