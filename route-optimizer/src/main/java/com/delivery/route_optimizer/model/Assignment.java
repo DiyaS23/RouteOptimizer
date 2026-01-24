@@ -1,7 +1,6 @@
 package com.delivery.route_optimizer.model;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.Id;
 
 @Entity
 @Table(name = "assignments")
