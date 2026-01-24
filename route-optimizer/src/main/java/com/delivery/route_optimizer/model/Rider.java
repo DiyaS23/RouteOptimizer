@@ -17,6 +17,7 @@ public class Rider {
     private Long id;
 
     private String name;
+    private boolean active;
 
     @ManyToOne
     private Node currentNode;

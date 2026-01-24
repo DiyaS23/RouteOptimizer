@@ -12,7 +12,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-
 @Service
 @RequiredArgsConstructor
 public class RouteService {
@@ -22,20 +21,23 @@ public class RouteService {
     private final RedisTemplate<String, String> redisTemplate;
     private final RouteMetrics metrics;
 
+    public RouteResult calculateRoute(String sourceCode, String targetCode) {
 
-    public List<GraphNode> calculateShortestPath(String sourceCode, String targetCode) {
+        metrics.routeRequests.increment();
         String cacheKey = "route:" + sourceCode + ":" + targetCode;
 
         String cached = redisTemplate.opsForValue().get(cacheKey);
         if (cached != null) {
             metrics.cacheHits.increment();
-            return Arrays.stream(cached.split(","))
-                    .map(code -> new GraphNode(null, code))
-                    .toList();
+
+            List<String> nodes = List.of(cached.split(","));
+            double distance = estimateDistance(nodes); // temp but consistent
+
+            return new RouteResult(nodes, distance, true);
         }
-        else {
-            metrics.cacheMisses.increment();
-        }
+
+        metrics.cacheMisses.increment();
+
         Node sourceNode = nodeRepository.findByCode(sourceCode)
                 .orElseThrow(() -> new RuntimeException("Source node not found"));
 
@@ -47,14 +49,13 @@ public class RouteService {
 
         Map<Long, GraphNode> graphNodeMap = new HashMap<>();
         for (Node n : dbNodes) {
-            graphNodeMap.put(
-                    n.getId(),
-                    new GraphNode(n.getId(), n.getCode())
-            );
+            graphNodeMap.put(n.getId(), new GraphNode(n.getId(), n.getCode()));
         }
 
         Graph graph = new Graph();
         graphNodeMap.values().forEach(graph::addNode);
+
+        Map<String, Double> edgeWeightMap = new HashMap<>();
 
         for (Edge e : dbEdges) {
             GraphNode from = graphNodeMap.get(e.getFrom().getId());
@@ -62,6 +63,8 @@ public class RouteService {
 
             double weight = e.getDistance() * e.getTrafficFactor();
             graph.addEdge(from, to, weight);
+
+            edgeWeightMap.put(from.getCode() + "->" + to.getCode(), weight);
         }
 
         DijkstraAlgorithm dijkstra = new DijkstraAlgorithm();
@@ -71,15 +74,32 @@ public class RouteService {
                 graphNodeMap.get(targetNode.getId())
         );
 
-        String value = path.stream()
+        if (path.isEmpty()) {
+            throw new RuntimeException("No route found");
+        }
+
+        double totalDistance = 0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            String key = path.get(i).getCode() + "->" + path.get(i + 1).getCode();
+            totalDistance += edgeWeightMap.getOrDefault(key, 0.0);
+        }
+
+        List<String> nodes = path.stream()
                 .map(GraphNode::getCode)
-                .reduce((a, b) -> a + "," + b)
-                .orElse("");
+                .toList();
 
-        redisTemplate.opsForValue()
-                .set(cacheKey, value, java.time.Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set(
+                cacheKey,
+                String.join(",", nodes),
+                java.time.Duration.ofMinutes(5)
+        );
 
-        return path;
+        return new RouteResult(nodes, totalDistance, false);
+    }
+
+    private double estimateDistance(List<String> nodes) {
+        return nodes.size() > 1 ? nodes.size() - 1 : 0;
     }
 }
+
 
