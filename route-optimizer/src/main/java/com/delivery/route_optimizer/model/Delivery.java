@@ -5,17 +5,20 @@ import lombok.* ;
 
 @Entity
 @Table(name = "deliveries")
+<<<<<<< HEAD
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+=======
+>>>>>>> parent of bf7d1ad (updated)
 public class Delivery {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+
     private String destinationCode;
     private boolean completed;
 }
