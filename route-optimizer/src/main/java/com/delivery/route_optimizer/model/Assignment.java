@@ -11,12 +11,13 @@ public class Assignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Rider rider;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Delivery delivery;
 
     private String routeId;
+    private boolean active;
 }
 
