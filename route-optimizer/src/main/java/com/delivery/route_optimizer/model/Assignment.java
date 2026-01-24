@@ -1,6 +1,7 @@
 package com.delivery.route_optimizer.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Id;
 
 @Entity
 @Table(name = "assignments")
