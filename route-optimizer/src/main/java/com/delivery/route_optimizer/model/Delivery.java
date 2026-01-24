@@ -2,9 +2,15 @@ package com.delivery.route_optimizer.model;
 
 import jakarta.persistence.*;
 import org.springframework.data.annotation.Id;
+import lombok.* ;
 
 @Entity
 @Table(name = "deliveries")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Delivery {
 
     @Id
