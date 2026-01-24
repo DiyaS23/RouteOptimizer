@@ -1,10 +1,7 @@
 package com.delivery.route_optimizer.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.*;
+import lombok.* ;
 
 @Entity
 @Table(name = "deliveries")
@@ -13,7 +10,6 @@ import org.springframework.data.annotation.Id;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "deliveries")
 public class Delivery {
 
     @Id
